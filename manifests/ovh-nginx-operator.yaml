@@ -1,0 +1,86 @@
+# The namespace where the operator is deployed
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ovh-nginx-operator
+---
+# Authorisations for the operator
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ovhnginxoperator-admin-role
+rules:
+- apiGroups:
+  - tutorials.ovhcloud.com
+  resources:
+  - ovhnginxs
+  - ovhnginxs/status
+  - ovhnginxs/finalizers  
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  - "serviceaccounts"
+  - "services"  
+  verbs:
+  - "*"
+- apiGroups:
+  - "apps"
+  verbs:
+    - "*"
+  resources:
+  - "deployments"
+---
+# The service account used for the POD where is the operator
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ovh-nginx-operator-sa
+  namespace: ovh-nginx-operator
+---
+# The affected authorisation ti the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ovh-nginx-operator-admin
+subjects:
+- kind: ServiceAccount
+  name: ovh-nginx-operator-sa
+  namespace: ovh-nginx-operator
+roleRef:
+  kind: ClusterRole
+  name: ovhnginxoperator-admin-role
+  apiGroup: ""
+---
+# The deployment for the operator
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ovh-nginx-operator
+  namespace: ovh-nginx-operator
+spec:
+  selector:
+    matchLabels:
+      app: ovh-nginx-operator
+  replicas: 1 
+  strategy:
+    type: Recreate 
+  template:
+    metadata:
+      labels:
+        app: ovh-nginx-operator
+    spec:
+      serviceAccountName: ovh-nginx-operator-sa
+      containers:
+      - name: operator
+        image: wilda/ovh-nginx-operator:1.0.0
+        imagePullPolicy: Always
+---

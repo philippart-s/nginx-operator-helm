@@ -1,0 +1,33 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: ovhnginxs.tutorials.ovhcloud.com
+spec:
+  group: tutorials.ovhcloud.com
+  names:
+    kind: OvhNginx
+    listKind: OvhNginxList
+    plural: ovhnginxs
+    singular: ovhnginx
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              service:
+                type: object
+                properties:
+                  port:
+                    type: integer
+              replicaCount:
+                type: integer
+    served: true
+    storage: true
+    subresources:
+      status: {}

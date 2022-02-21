@@ -1,0 +1,4 @@
+- group: tutorials.ovhcloud.com
+  version: v1
+  kind: OvhNginx
+  chart: helm-charts/ovh-nginx
